@@ -10,8 +10,12 @@ namespace GymManagement.Controllers
     public class PlansController : Controller
     {
         //private readonly GymDbContext dbContext;
-        private readonly IPlanRepository planRepository = new PlanRepository();
-        
+        private readonly IPlanRepository planRepository;
+        public PlansController(IPlanRepository planRepository)
+        {
+            this.planRepository = planRepository;
+        }
+
         //GET BaseUrl/Plans/Index -> listing All Plans
         public async Task<IActionResult> Index(CancellationToken ct)
         {

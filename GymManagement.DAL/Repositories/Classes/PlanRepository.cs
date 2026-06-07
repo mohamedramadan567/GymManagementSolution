@@ -13,9 +13,9 @@ namespace GymManagement.DAL.Repositories.Classes
     public class PlanRepository : IPlanRepository
     {
         private readonly GymDbContext dbContext;
-        public PlanRepository()
+        public PlanRepository(GymDbContext dbContext)
         {
-            dbContext = new GymDbContext();
+            this.dbContext = dbContext;
         }
 
 
