@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GymManagement.DAL.Models
+namespace GymManagement.DAL.Data.Models
 {
     public class Category : BaseEntity
     {
         public string CategoryName { get; set; } = default!;
+
+        public ICollection<Session> Sessions { get; set; } = default!;
     }
 }

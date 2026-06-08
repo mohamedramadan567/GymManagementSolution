@@ -1,6 +1,4 @@
-﻿using GymManagement.DAL.Models;
-
-namespace GymManagement.Models
+﻿namespace GymManagement.DAL.Data.Models
 {
     public class Plan : BaseEntity
     {
@@ -10,5 +8,6 @@ namespace GymManagement.Models
         public int DurationDays { get; set; }
         public bool IsActive { get; set; }
 
+        public ICollection<Member> PlanMembers { get; set; } = default!;
     }
 }

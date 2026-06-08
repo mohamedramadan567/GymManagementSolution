@@ -1,4 +1,4 @@
-﻿using GymManagement.DAL.Models;
+﻿using GymManagement.DAL.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GymManagement.DAL.Configurations
+namespace GymManagement.DAL.Data.Configurations
 {
     public class GymUserConfiguration<T> : IEntityTypeConfiguration<T> where T : GymUser
     {
@@ -30,7 +30,7 @@ namespace GymManagement.DAL.Configurations
             builder.ToTable(tb =>
             {
                 tb.HasCheckConstraint("CheckEmail", "Email like '_%@_%._%'");
-                tb.HasCheckConstraint("CheckPhone", "Phone like 01[0125]________");
+                tb.HasCheckConstraint("CheckPhone", "Phone like '01[0125]________'");
             });
 
             builder.OwnsOne(u => u.Address, address =>
