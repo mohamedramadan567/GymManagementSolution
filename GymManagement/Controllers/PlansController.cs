@@ -4,14 +4,15 @@ using GymManagement.DAL.Data.DbContexts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using GymManagement.DAL.Data.Models;
 
 namespace GymManagement.Controllers
 {
     public class PlansController : Controller
     {
         //private readonly GymDbContext dbContext;
-        private readonly IPlanRepository planRepository;
-        public PlansController(IPlanRepository planRepository)
+        private readonly IGenericRepository<Plan> planRepository;
+        public PlansController(IGenericRepository<Plan> planRepository)
         {
             this.planRepository = planRepository;
         }
@@ -25,7 +26,7 @@ namespace GymManagement.Controllers
 
         public async Task<IActionResult> Details(int id, CancellationToken ct)
         {
-            var plan = await planRepository.GetById(id, ct);
+            var plan = await planRepository.GetByIdAsync(id, ct);
 
             if(plan is null)
             {

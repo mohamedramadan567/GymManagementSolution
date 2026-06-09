@@ -7,13 +7,8 @@ using System.Threading.Tasks;
 
 namespace GymManagement.DAL.Repositories.Interfaces
 {
-    public interface IPlanRepository
+    public interface IPlanRepository : IGenericRepository<Plan>
     {
-        Task<IEnumerable<Plan>> GetAllAsync(bool tracking = false, CancellationToken ct = default);
-        Task<Plan?> GetById(int id, CancellationToken ct = default);
-        Task<int> AddAsync(Plan plan, CancellationToken ct = default);
-        Task<int> UpdateAsync(Plan plan, CancellationToken ct = default);
-        Task<int> DeleteAsync(Plan plan, CancellationToken ct = default);
-
+        Task<IEnumerable<Plan>> GetPlansWithMembers();
     }
 }
