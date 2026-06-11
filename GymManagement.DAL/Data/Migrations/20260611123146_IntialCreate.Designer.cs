@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GymManagement.DAL.Data.Migrations
 {
     [DbContext(typeof(GymDbContext))]
-    [Migration("20260608175317_IntialCreate")]
+    [Migration("20260611123146_IntialCreate")]
     partial class IntialCreate
     {
         /// <inheritdoc />
@@ -132,8 +132,8 @@ namespace GymManagement.DAL.Data.Migrations
                         .HasColumnName("JoinDate")
                         .HasDefaultValueSql("GETDATE()");
 
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("DateOfBirth")
+                        .HasColumnType("date");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -322,8 +322,8 @@ namespace GymManagement.DAL.Data.Migrations
                         .HasColumnName("HireDate")
                         .HasDefaultValueSql("GETDATE()");
 
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("DateOfBirth")
+                        .HasColumnType("date");
 
                     b.Property<string>("Email")
                         .IsRequired()

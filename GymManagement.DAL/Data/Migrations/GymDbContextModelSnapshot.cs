@@ -129,8 +129,8 @@ namespace GymManagement.DAL.Data.Migrations
                         .HasColumnName("JoinDate")
                         .HasDefaultValueSql("GETDATE()");
 
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("DateOfBirth")
+                        .HasColumnType("date");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -319,8 +319,8 @@ namespace GymManagement.DAL.Data.Migrations
                         .HasColumnName("HireDate")
                         .HasDefaultValueSql("GETDATE()");
 
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("DateOfBirth")
+                        .HasColumnType("date");
 
                     b.Property<string>("Email")
                         .IsRequired()

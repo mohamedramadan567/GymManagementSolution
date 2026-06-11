@@ -28,6 +28,8 @@ namespace GymManagement.PL.Controllers
         #region Create Member
         //GET BaseUrl/Members/Create
         //Create - Show empty form
+        [HttpGet]
+        public IActionResult Create() => View();
 
         //POST BaseUrl/Members/Create {Member}
         //CreateMember - Save submitted form
