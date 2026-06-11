@@ -1,7 +1,10 @@
 ﻿using GymManagement.BLL.Services.Interfaces;
+using GymManagement.BLL.ViewModels.MemberViewModels;
 using GymManagement.DAL.Data.Models;
 using GymManagement.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Threading.Tasks;
 
 namespace GymManagement.PL.Controllers
 {
@@ -33,6 +36,15 @@ namespace GymManagement.PL.Controllers
 
         //POST BaseUrl/Members/Create {Member}
         //CreateMember - Save submitted form
+        public async Task<IActionResult> CreateMember(CreateMemberViewModel member, CancellationToken ct = default)
+        {
+            if (!ModelState.IsValid) return View(nameof(Create), member);
+
+            var result = await _memberService.CreateMemberAsync(member, ct);
+
+            return RedirectToAction(nameof(Index));
+        }
+
         #endregion
 
         #region Edit Member
