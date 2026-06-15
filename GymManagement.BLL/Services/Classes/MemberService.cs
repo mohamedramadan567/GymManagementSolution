@@ -13,10 +13,19 @@ namespace GymManagement.BLL.Services.Classes
     public class MemberService : IMemberService
     {
         private readonly IGenericRepository<Member> _memberRepository;
+        private readonly IGenericRepository<MemberShip> _membershipRepository;
+        private readonly IGenericRepository<Plan> _planRepository;
+        private readonly IGenericRepository<HealthRecord> _healthRecordRepository;
 
-        public MemberService(IGenericRepository<Member> memberRepository)
+        public MemberService(IGenericRepository<Member> memberRepository,
+                             IGenericRepository<MemberShip> membershipRepository,
+                             IGenericRepository<Plan> planRepository,
+                             IGenericRepository<HealthRecord> healthRecordRepository)
         {
             _memberRepository = memberRepository;
+            _membershipRepository = membershipRepository;
+            _planRepository = planRepository;
+            _healthRecordRepository = healthRecordRepository;
         }
 
         public async Task<bool> CreateMemberAsync(CreateMemberViewModel model, CancellationToken ct = default)
@@ -73,6 +82,49 @@ namespace GymManagement.BLL.Services.Classes
             });
 
             return memberViewModel;
+        }
+
+        public async Task<MemberViewModel?> GetMemberDetailsByIdAsync(int memberId, CancellationToken ct = default)
+        {
+            var member = await _memberRepository.GetByIdAsync(memberId, ct);
+
+            if (member == null) return null;
+
+            var model = new MemberViewModel()
+            {
+                Name = member.Name,
+                Email = member.Email,
+                Phone = member.Phone,
+                Gender = member.Gender.ToString(),
+                DateOfBirth = member.DateOfBirth.ToShortDateString(),
+                Address = $"{member.Address.BuildingNumber} - {member.Address.Street} - {member.Address.City}",
+            };
+
+            var activeMembership = await _membershipRepository.FirstOrDefaultAsync(m => m.MemberId == memberId && m.EndDate > DateTime.Now);
+
+            if(activeMembership is not null)
+            {
+                var activePlan = await _planRepository.GetByIdAsync(activeMembership.PlanId, ct);
+                model.PlanName = activePlan?.Name;
+                model.MembershipStartDate = activeMembership.CreatedAt.ToString();
+                model.MembershipEndDate = activeMembership.EndDate.ToString();
+            }
+
+            return model;
+
+        }
+
+        public async Task<HealthRecordViewModel?> GetMemberHealthRecordByIdAsync(int memberId, CancellationToken ct = default)
+        {
+            var healthRecord = await _healthRecordRepository.FirstOrDefaultAsync(x => x.MemberId == memberId, ct: ct);
+            if (healthRecord is null) return null;
+            return new HealthRecordViewModel()
+            {
+                Height = healthRecord.Height,
+                Weight = healthRecord.Weight,
+                BloodType = healthRecord.BloodType,
+                Note = healthRecord.Note
+            };
         }
     }
 }

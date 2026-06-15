@@ -12,21 +12,52 @@ namespace GymManagement.PL.Controllers
     {
         private readonly IMemberService _memberService;
 
-        //GET BaseUrl/Members/Index
-        //Index - List all members
         public MembersController(IMemberService memberService)
         {
             _memberService = memberService;
         }
 
+        //GET BaseUrl/Members/Index
+        //Index - List all members
         public async Task<IActionResult> Index(CancellationToken ct)
         {
             var members = await _memberService.GetAllMembersAsync(ct);
             return View(members);
         }
 
-        //GET BaseUrl/Members/Details/{id}  //optional id
-        //Details - Show one member's details
+        //GET BaseUrl/Members/MemberDetails/{id}  //optional id
+        //MemberDetails - Show one member's details
+        public async Task<IActionResult> MemberDetails(int id, CancellationToken ct)
+        {
+            var member = await _memberService.GetMemberDetailsByIdAsync(id, ct);
+
+            if(member is null)
+            {
+                TempData["ErrorMessage"] = "Member Not Found";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(member);
+        }
+
+        //GET BaseUrl/Members/HealthRecordDetails/{id}  //optional id
+        //HealthRecordDetails - Show one member's details
+
+        public async Task<ActionResult> HealthRecordDetails(int id, CancellationToken ct)
+        {
+            //Get Member by id
+            var member = await _memberService.GetMemberHealthRecordByIdAsync(id, ct);
+
+            if(member == null)
+            {
+                TempData["ErrorMessage"] = "Health Record not Found";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(member);
+            //Check is member null => return Index with message
+            //member is not null => return view data
+        }
 
         #region Create Member
         //GET BaseUrl/Members/Create
@@ -42,7 +73,12 @@ namespace GymManagement.PL.Controllers
 
             var result = await _memberService.CreateMemberAsync(member, ct);
 
-            return RedirectToAction(nameof(Index));
+            if (result)
+                TempData["SuccessMessage"] = "Member Created Successfully";
+            else
+                TempData["ErrorMessage"] = "Faild to Create Member";
+
+                return RedirectToAction(nameof(Index));
         }
 
         #endregion
