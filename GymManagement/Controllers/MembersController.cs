@@ -121,9 +121,36 @@ namespace GymManagement.PL.Controllers
         #region Delete Member
         //GET BaseUrl/Members/Delete/{id}
         //Delete - Shows deletion confirmation page
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id, CancellationToken ct)
+        {
+            var member = await _memberService.GetMemberDetailsByIdAsync(id, ct);
+
+            if(member == null)
+            {
+                TempData["ErrorMessage"] = "Member Not Found";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View();
+        }
 
         //POST BaseUrl/Members/DeleteConfirmed/{id}
         //DeleteConfirmed - Processes deletion 
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteConfirmed([FromRoute]int id, CancellationToken ct)
+        {
+            var result = await _memberService.RemoveMemberAsync(id, ct);
+
+            if (result)
+                TempData["SuccessMessage"] = "Member Deleted Successfully";
+            else
+                TempData["ErrorMessage"] = "Faild to Delete Member";
+
+            return RedirectToAction(nameof(Index));
+
+        }
         #endregion
     }
 }

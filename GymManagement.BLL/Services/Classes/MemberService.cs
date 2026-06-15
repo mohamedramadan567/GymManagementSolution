@@ -16,16 +16,19 @@ namespace GymManagement.BLL.Services.Classes
         private readonly IGenericRepository<MemberShip> _membershipRepository;
         private readonly IGenericRepository<Plan> _planRepository;
         private readonly IGenericRepository<HealthRecord> _healthRecordRepository;
+        private readonly IGenericRepository<Booking> _bookingRepository;
 
         public MemberService(IGenericRepository<Member> memberRepository,
                              IGenericRepository<MemberShip> membershipRepository,
                              IGenericRepository<Plan> planRepository,
-                             IGenericRepository<HealthRecord> healthRecordRepository)
+                             IGenericRepository<HealthRecord> healthRecordRepository,
+                             IGenericRepository<Booking> bookingRepository)
         {
             _memberRepository = memberRepository;
             _membershipRepository = membershipRepository;
             _planRepository = planRepository;
             _healthRecordRepository = healthRecordRepository;
+            _bookingRepository = bookingRepository;
         }
 
         public async Task<bool> CreateMemberAsync(CreateMemberViewModel model, CancellationToken ct = default)
@@ -145,6 +148,21 @@ namespace GymManagement.BLL.Services.Classes
             };
 
             return model;
+        }
+
+        public async Task<bool> RemoveMemberAsync(int memberId, CancellationToken ct = default)
+        {
+            var member = await _memberRepository.GetByIdAsync(memberId, ct);
+
+            if (member == null) return false;
+
+            var hasFutureBookings = await _bookingRepository.AnyAsync(m => m.MemberId == memberId && m.Session.StartDate > DateTime.Now);
+
+            if (hasFutureBookings) return false;
+
+            var result = await _memberRepository.DeleteAsync(member, ct);
+            return result > 0;
+
         }
 
         public async Task<bool> UpdateMemberDetailsAsync(int id, MemberToUpdateViewModel model, CancellationToken ct = default)
