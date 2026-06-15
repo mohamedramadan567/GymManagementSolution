@@ -43,7 +43,7 @@ namespace GymManagement.PL.Controllers
         //GET BaseUrl/Members/HealthRecordDetails/{id}  //optional id
         //HealthRecordDetails - Show one member's details
 
-        public async Task<ActionResult> HealthRecordDetails(int id, CancellationToken ct)
+        public async Task<IActionResult> HealthRecordDetails(int id, CancellationToken ct)
         {
             //Get Member by id
             var member = await _memberService.GetMemberHealthRecordByIdAsync(id, ct);
@@ -86,9 +86,36 @@ namespace GymManagement.PL.Controllers
         #region Edit Member
         //GET BaseUrl/Members/Edit/{id}
         //Edit - Show form pre-filled
+        [HttpGet]
+        public async Task<IActionResult> EditMember(int id, CancellationToken ct)
+        {
+            var member = await _memberService.GetMemberToUpdateAsync(id, ct);
+            
+            if(member == null)
+            {
+                TempData["ErrorMessage"] = "Member Not Found";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(member);
+        }
 
         //POST BaseUrl/Members/Edit {Member}
         //Edit - Save edits
+
+        public async Task<IActionResult> EditMember([FromRoute]int id, MemberToUpdateViewModel model, CancellationToken ct)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var result = await _memberService.UpdateMemberDetailsAsync(id, model, ct);
+
+            if (result)
+                TempData["SuccessMessage"] = "Member Updated Successfully";
+            else
+                TempData["ErrorMessage"] = "Faild to Update Member";
+
+            return RedirectToAction(nameof(Index));
+        }
         #endregion
 
         #region Delete Member
