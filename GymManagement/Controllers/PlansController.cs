@@ -37,6 +37,7 @@ namespace GymManagement.Controllers
 
             if (plan is null)
             {
+                TempData["ErrorMessage"] = "Plan not found. ";
                 return RedirectToAction(nameof(Index));
             }
             else

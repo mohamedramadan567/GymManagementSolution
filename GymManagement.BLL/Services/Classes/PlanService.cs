@@ -75,7 +75,11 @@ namespace GymManagement.BLL.Services.Classes
         {
             var plan = await _planRepository.GetByIdAsync(planId, ct);
             if (plan is null) return false;
+
+            if (plan.IsActive && await HasActiveMembershipsAsync(planId, ct)) return false;
+
             plan.IsActive = !plan.IsActive;
+            plan.UpdatedAt = DateTime.Now;
             var result = await _planRepository.UpdateAsync(plan, ct);
             return result > 0;
         }
