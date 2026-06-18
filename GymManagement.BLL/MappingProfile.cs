@@ -16,6 +16,17 @@ namespace GymManagement.BLL
     {
         public MappingProfile()
         {
+            MemberMap();
+
+            TrainerMap();
+
+            PlaMap();
+
+            SessionMap();
+        }
+
+        private void MemberMap()
+        {
             #region Member
 
             CreateMap<Member, MemberViewModel>()
@@ -50,7 +61,10 @@ namespace GymManagement.BLL
                 .ForMember(dest => dest.HealthRecord, opt => opt.MapFrom(src => src.HealthRecordViewModel));
 
             #endregion
+        }
 
+        private void TrainerMap()
+        {
             #region Trainer
 
             CreateMap<Trainer, TrainerViewModel>()
@@ -79,7 +93,10 @@ namespace GymManagement.BLL
                 }));
 
             #endregion
+        }
 
+        private void PlaMap()
+        {
             #region Plan
 
             CreateMap<Plan, PlanViewModel>();
@@ -90,12 +107,20 @@ namespace GymManagement.BLL
                 .ForMember(dest => dest.Name, opt => opt.Ignore());
 
             #endregion
+        }
 
-            #region Session
+        private void SessionMap()
+        {
             CreateMap<Session, SessionViewModel>()
                 .ForMember(dest => dest.TrainerName, opt => opt.MapFrom(src => src.Trianer.Name))
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.CategoryName));
-            #endregion
+
+            CreateMap<CreateSessionViewModel, Session>();
+
+            CreateMap<Category, CategorySelectViewModel>();
+            CreateMap<Trainer, TrainerSelectViewModel>();
         }
     }
+
+    
 }
