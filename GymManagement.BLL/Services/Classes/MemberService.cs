@@ -1,4 +1,5 @@
-﻿using GymManagement.BLL.Services.Interfaces;
+﻿using AutoMapper;
+using GymManagement.BLL.Services.Interfaces;
 using GymManagement.BLL.ViewModels.MemberViewModels;
 using GymManagement.DAL.Data.Models;
 using GymManagement.DAL.Repositories.Interfaces;
@@ -13,10 +14,12 @@ namespace GymManagement.BLL.Services.Classes
     public class MemberService : IMemberService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public MemberService(IUnitOfWork unitOfWork)
+        public MemberService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         public async Task<bool> CreateMemberAsync(CreateMemberViewModel model, CancellationToken ct = default)
@@ -28,27 +31,7 @@ namespace GymManagement.BLL.Services.Classes
             //if Email or Phone Exists return false
             if (emailExit || phoneExit) return false;
             //else add member
-            var member = new Member()
-            {
-                Name = model.Name,
-                Email = model.Email,
-                Phone = model.Phone,
-                DateOfBirth = model.DateOfBirth,
-                Gender = model.Gender,
-                Address = new Address()
-                {
-                    BuildingNumber = model.BuildingNumber,
-                    City = model.City,
-                    Street = model.Street
-                },
-                HealthRecord = new HealthRecord()
-                {
-                    BloodType = model.HealthRecordViewModel.BloodType,
-                    Weight = model.HealthRecordViewModel.Weight,
-                    Height = model.HealthRecordViewModel.Height,
-                    Note = model.HealthRecordViewModel.Note
-                }
-            };
+            var member = _mapper.Map<CreateMemberViewModel, Member>(model);
 
 
             _unitOfWork.GetRepository<Member>().Add(member); // Add local
@@ -63,15 +46,7 @@ namespace GymManagement.BLL.Services.Classes
 
             if (!members.Any()) return [];
 
-            var memberViewModel = members.Select(m => new MemberViewModel()
-            {
-                Id = m.Id,
-                Photo = m.Photo,
-                Name = m.Name,
-                Email = m.Email,
-                Phone = m.Phone,
-                Gender = m.Gender.ToString()
-            });
+            var memberViewModel = _mapper.Map<IEnumerable<Member>, IEnumerable<MemberViewModel>>(members);
 
             return memberViewModel;
         }
@@ -82,15 +57,7 @@ namespace GymManagement.BLL.Services.Classes
 
             if (member == null) return null;
 
-            var model = new MemberViewModel()
-            {
-                Name = member.Name,
-                Email = member.Email,
-                Phone = member.Phone,
-                Gender = member.Gender.ToString(),
-                DateOfBirth = member.DateOfBirth.ToShortDateString(),
-                Address = $"{member.Address.BuildingNumber} - {member.Address.Street} - {member.Address.City}",
-            };
+            var model = _mapper.Map<Member, MemberViewModel>(member);
 
             var activeMembership = await _unitOfWork.GetRepository<MemberShip>().FirstOrDefaultAsync(m => m.MemberId == memberId && m.EndDate > DateTime.Now);
 
@@ -110,13 +77,7 @@ namespace GymManagement.BLL.Services.Classes
         {
             var healthRecord = await _unitOfWork.GetRepository<HealthRecord>().FirstOrDefaultAsync(x => x.MemberId == memberId, ct: ct);
             if (healthRecord is null) return null;
-            return new HealthRecordViewModel()
-            {
-                Height = healthRecord.Height,
-                Weight = healthRecord.Weight,
-                BloodType = healthRecord.BloodType,
-                Note = healthRecord.Note
-            };
+            return _mapper.Map<HealthRecord, HealthRecordViewModel>(healthRecord);
         }
 
         public async Task<MemberToUpdateViewModel?> GetMemberToUpdateAsync(int memberId, CancellationToken ct = default)
@@ -125,16 +86,7 @@ namespace GymManagement.BLL.Services.Classes
 
             if (member is null) return null;
 
-            var model = new MemberToUpdateViewModel()
-            {
-                BuildingNumber = member.Address.BuildingNumber,
-                City = member.Address.City,
-                Street = member.Address.Street,
-                Email = member.Email,
-                Name = member.Name,
-                Phone = member.Phone,
-                Photo = member.Photo
-            };
+            var model = _mapper.Map<Member, MemberToUpdateViewModel>(member);
 
             return model;
         }
@@ -165,11 +117,7 @@ namespace GymManagement.BLL.Services.Classes
 
             if (EmailExist || PhoneExist) return false;
 
-            member.Address.City =  model.City;
-            member.Email = model.Email;
-            member.Address.Street = model.Street;
-            member.Address.BuildingNumber = model.BuildingNumber;
-            member.Phone = model.Phone;
+            _mapper.Map(model, member);
             member.UpdatedAt = DateTime.Now;
 
             _unitOfWork.GetRepository<Member>().Update(member);
