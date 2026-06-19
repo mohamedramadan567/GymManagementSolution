@@ -25,24 +25,24 @@ namespace GymManagement.Controllers
         //GET BaseUrl/Plans/Index -> listing All Plans
         public async Task<IActionResult> Index(CancellationToken ct)
         {
-            var plans = await _planService.GetAllPlansAsync(ct);
-            return View(plans);
+            var result = await _planService.GetAllPlansAsync(ct);
+            return View(result.value);
         }
 
         //GET BaseUrl/Plans/Index
         [HttpGet]
         public async Task<IActionResult> Details(int id, CancellationToken ct)
         {
-            var plan = await _planService.GetPlanByIdAsync(id, ct);
+            var result = await _planService.GetPlanByIdAsync(id, ct);
 
-            if (plan is null)
+            if (!result.success)
             {
                 TempData["ErrorMessage"] = "Plan not found. ";
                 return RedirectToAction(nameof(Index));
             }
             else
             {
-                return View(plan);
+                return View(result.value);
             }
         }
 
@@ -52,25 +52,25 @@ namespace GymManagement.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id, CancellationToken ct)
         {
-            var plan = await _planService.GetPlanToUpdateAsync(id, ct);
-            if(plan is null)
+            var result = await _planService.GetPlanToUpdateAsync(id, ct);
+            if (!result.success)
             {
                 TempData["ErrorMessage"] = "Plan cannot be edited (not found, inactive, or has active memberships). ";
                 return RedirectToAction(nameof(Index));
             }
-            return View(plan);
+            return View(result.value);
         }
 
 
         //POST BaseUrl/Plans/Edit {Plan}
         //Edit - Save edits
         [HttpPost]
-        public async Task<IActionResult> Edit(int id,  PlanToUpdateViewModel model, CancellationToken ct)
+        public async Task<IActionResult> Edit(int id, PlanToUpdateViewModel model, CancellationToken ct)
         {
             if (!ModelState.IsValid) return View(model);
 
             var result = await _planService.UpdatePlanDetailsAsync(id, model, ct);
-            if(result)
+            if (result.success)
             {
                 TempData["SuccessMessage"] = "Plan Updated Successfully";
             }
@@ -85,7 +85,7 @@ namespace GymManagement.Controllers
         public async Task<IActionResult> Activate(int id, CancellationToken ct)
         {
             var result = await _planService.ToggleActivationAsync(id, ct);
-            if (result)
+            if (result.success)
                 TempData["SuccessMessage"] = "Plan Status Changed";
             else
                 TempData["ErrorMessage"] = "Failed to Toggle Plan Status";

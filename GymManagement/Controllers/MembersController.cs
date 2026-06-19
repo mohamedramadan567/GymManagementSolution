@@ -22,7 +22,11 @@ namespace GymManagement.PL.Controllers
         public async Task<IActionResult> Index(CancellationToken ct)
         {
             var members = await _memberService.GetAllMembersAsync(ct);
-            return View(members);
+            if(!members.success)
+            {
+                return View(Enumerable.Empty<MemberViewModel>());
+            }
+            return View(members.value);
         }
 
         //GET BaseUrl/Members/MemberDetails/{id}  //optional id
@@ -31,13 +35,13 @@ namespace GymManagement.PL.Controllers
         {
             var member = await _memberService.GetMemberDetailsByIdAsync(id, ct);
 
-            if(member is null)
+            if(!member.success)
             {
-                TempData["ErrorMessage"] = "Member Not Found";
+                TempData["ErrorMessage"] =  member.error ?? "Member Not Found";
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(member);
+            return View(member.value);
         }
 
         //GET BaseUrl/Members/HealthRecordDetails/{id}  //optional id
@@ -48,13 +52,13 @@ namespace GymManagement.PL.Controllers
             //Get Member by id
             var member = await _memberService.GetMemberHealthRecordByIdAsync(id, ct);
 
-            if(member == null)
+            if(!member.success)
             {
-                TempData["ErrorMessage"] = "Health Record not Found";
+                TempData["ErrorMessage"] = member.error ?? "Health Record not Found";
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(member);
+            return View(member.value);
             //Check is member null => return Index with message
             //member is not null => return view data
         }
@@ -73,10 +77,10 @@ namespace GymManagement.PL.Controllers
 
             var result = await _memberService.CreateMemberAsync(member, ct);
 
-            if (result)
+            if (result.success)
                 TempData["SuccessMessage"] = "Member Created Successfully";
             else
-                TempData["ErrorMessage"] = "Faild to Create Member";
+                TempData["ErrorMessage"] = result.error;
 
                 return RedirectToAction(nameof(Index));
         }
@@ -91,13 +95,13 @@ namespace GymManagement.PL.Controllers
         {
             var member = await _memberService.GetMemberToUpdateAsync(id, ct);
             
-            if(member == null)
+            if(!member.success)
             {
-                TempData["ErrorMessage"] = "Member Not Found";
+                TempData["ErrorMessage"] = member.error ?? "Member Not Found";
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(member);
+            return View(member.value);
         }
 
         //POST BaseUrl/Members/Edit {Member}
@@ -109,10 +113,10 @@ namespace GymManagement.PL.Controllers
 
             var result = await _memberService.UpdateMemberDetailsAsync(id, model, ct);
 
-            if (result)
+            if (result.success)
                 TempData["SuccessMessage"] = "Member Updated Successfully";
             else
-                TempData["ErrorMessage"] = "Faild to Update Member";
+                TempData["ErrorMessage"] = result.error;
 
             return RedirectToAction(nameof(Index));
         }
@@ -126,9 +130,9 @@ namespace GymManagement.PL.Controllers
         {
             var member = await _memberService.GetMemberDetailsByIdAsync(id, ct);
 
-            if(member == null)
+            if(!member.success)
             {
-                TempData["ErrorMessage"] = "Member Not Found";
+                TempData["ErrorMessage"] = member.error ?? "Member Not Found";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -143,10 +147,10 @@ namespace GymManagement.PL.Controllers
         {
             var result = await _memberService.RemoveMemberAsync(id, ct);
 
-            if (result)
+            if (result.success)
                 TempData["SuccessMessage"] = "Member Deleted Successfully";
             else
-                TempData["ErrorMessage"] = "Faild to Delete Member";
+                TempData["ErrorMessage"] = result.error;
 
             return RedirectToAction(nameof(Index));
 

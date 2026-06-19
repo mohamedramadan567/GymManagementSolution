@@ -18,11 +18,11 @@ namespace GymManagement.PL.Controllers
         }
         public async Task<IActionResult> Index(CancellationToken ct)
         {
-            var sessions = await _sessionService.GetAllSessionsAsync(ct);
-            return View(sessions);
+            var result = await _sessionService.GetAllSessionsAsync(ct);
+            return View(result.value);
         }
 
-        #region Create Trainer
+        #region Create Session
         //GET BaseUrl/Sessions/Create
         //Create - Show empty form
         [HttpGet]
@@ -45,12 +45,12 @@ namespace GymManagement.PL.Controllers
 
             var result = await _sessionService.CreateSessionAsync(model, ct);
 
-            if (result)
+            if (result.success)
             {
                 TempData["SuccessMessage"] = "Session Created Successfully";
                 return RedirectToAction(nameof(Index));
             }
-            TempData["ErrorMessage"] = "Faild to Create Session";
+            TempData["ErrorMessage"] = result.error;
 
             await PopulateDropDownListAsync();
             return View(model);
@@ -60,9 +60,11 @@ namespace GymManagement.PL.Controllers
 
         private async Task PopulateDropDownListAsync()
         {
-            //to sent drop down list to view
-            ViewBag.Trainers = new SelectList(await _sessionService.GetTrainersForDropDownAsync(), "Id", "Name");
-            ViewBag.Categories = new SelectList(await _sessionService.GetCategoriesForDropDownAsync(), "Id", "CategoryName");
+            var trainersResult = await _sessionService.GetTrainersForDropDownAsync();
+            var categoriesResult = await _sessionService.GetCategoriesForDropDownAsync();
+
+            ViewBag.Trainers = new SelectList(trainersResult.value, "Id", "Name");
+            ViewBag.Categories = new SelectList(categoriesResult.value, "Id", "CategoryName");
         }
     }
 
