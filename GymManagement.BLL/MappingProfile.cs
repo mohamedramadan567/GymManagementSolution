@@ -119,6 +119,9 @@ namespace GymManagement.BLL
 
             CreateMap<Category, CategorySelectViewModel>();
             CreateMap<Trainer, TrainerSelectViewModel>();
+
+            CreateMap<Session, SessionToUpdateViewModel>().ReverseMap();
+
         }
     }
 

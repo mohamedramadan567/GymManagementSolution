@@ -1,5 +1,6 @@
 ﻿using GymManagement.BLL.Services.Classes;
 using GymManagement.BLL.Services.Interfaces;
+using GymManagement.BLL.ViewModels.MemberViewModels;
 using GymManagement.BLL.ViewModels.SessionViewModels;
 using GymManagement.BLL.ViewModels.TrainerViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -23,8 +24,6 @@ namespace GymManagement.PL.Controllers
         }
 
         #region Create Session
-        //GET BaseUrl/Sessions/Create
-        //Create - Show empty form
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -32,8 +31,6 @@ namespace GymManagement.PL.Controllers
             return View();
         }
 
-        //POST BaseUrl/Sessions/Create {Session}
-        //Create - Save submitted form
         [HttpPost]
         public async Task<IActionResult> Create(CreateSessionViewModel model, CancellationToken ct)
         {
@@ -58,6 +55,103 @@ namespace GymManagement.PL.Controllers
 
         #endregion
 
+
+        [HttpGet]
+        public async Task<IActionResult> Details(int id, CancellationToken ct)
+        {
+            var session = await _sessionService.GetSessionDetailsByIdAsync(id, ct);
+
+            if (!session.success)
+            {
+                TempData["ErrorMessage"] = session.error ?? "Session Not Found";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(session.value);
+        }
+
+
+        #region Edit Session
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id, CancellationToken ct)
+        {
+            var session = await _sessionService.GetSessionToUpdateAsync(id, ct);
+
+            if (!session.success)
+            {
+                TempData["ErrorMessage"] = session.error;
+                return RedirectToAction(nameof(Index));
+            }
+            var trainersResult = await _sessionService.GetTrainersForDropDownAsync();
+            ViewBag.Trainers = new SelectList(trainersResult.value, "Id", "Name");
+
+            return View(session.value);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Edit([FromRoute] int id, SessionToUpdateViewModel model, CancellationToken ct)
+        {
+            if (!ModelState.IsValid)
+            {
+                var trainersResult01 = await _sessionService.GetTrainersForDropDownAsync();
+                ViewBag.Trainers = new SelectList(trainersResult01.value, "Id", "Name");
+                return View(model);
+            }
+
+            var result = await _sessionService.UpdateSessionDetailsAsync(id, model, ct);
+
+            if (result.success)
+            {
+                TempData["SuccessMessage"] = "Session Updated Successfully";
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.error;
+                var trainersResult = await _sessionService.GetTrainersForDropDownAsync();
+                ViewBag.Trainers = new SelectList(trainersResult.value, "Id", "Name");
+                return View(model);
+            }
+
+            
+        }
+        #endregion
+
+
+        #region Delete Session
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id, CancellationToken ct)
+        {
+            var session = await _sessionService.GetSessionDetailsByIdAsync(id, ct);
+
+            if (!session.success)
+            {
+                TempData["ErrorMessage"] = session.error;
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteConfirmed([FromRoute] int id, CancellationToken ct)
+        {
+            var result = await _sessionService.RemoveSessionAsync(id, ct);
+
+            //if (result.success)
+            //    TempData["SuccessMessage"] = "Session Deleted Successfully";
+            //else
+            //    TempData["ErrorMessage"] = result.error;
+
+
+            TempData[result.success ? "SuccessMessage" : "ErrorMessage"] = result.success ? "Session Deleted Successfully" : result.error;
+            return RedirectToAction(nameof(Index));
+
+        }
+        #endregion
+
+
         private async Task PopulateDropDownListAsync()
         {
             var trainersResult = await _sessionService.GetTrainersForDropDownAsync();
@@ -66,6 +160,7 @@ namespace GymManagement.PL.Controllers
             ViewBag.Trainers = new SelectList(trainersResult.value, "Id", "Name");
             ViewBag.Categories = new SelectList(categoriesResult.value, "Id", "CategoryName");
         }
+
     }
 
     
