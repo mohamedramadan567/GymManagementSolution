@@ -1,17 +1,19 @@
 using GymManagement.BLL;
 using GymManagement.BLL.Services.Classes;
 using GymManagement.BLL.Services.Interfaces;
+using GymManagement.DAL.Data.DataSeeding;
 using GymManagement.DAL.Data.DbContexts;
 using GymManagement.DAL.Repositories.Classes;
 using GymManagement.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Threading.Tasks;
 
 namespace GymManagement
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +34,19 @@ namespace GymManagement
             });
 
             var app = builder.Build();
+
+            var scope = app.Services.CreateScope();
+            var _context = scope.ServiceProvider.GetRequiredService<GymDbContext>();
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+            var folderPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot", "Files");
+            var penddingMigrations = await _context.Database.GetPendingMigrationsAsync();
+            if(penddingMigrations.Any())
+            {
+                await _context.Database.MigrateAsync();
+            }
+
+            await GymDataSeeding.SeedAsync(_context, folderPath, logger);
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
