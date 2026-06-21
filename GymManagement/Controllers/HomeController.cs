@@ -1,21 +1,31 @@
-using System.Diagnostics;
+using GymManagement.BLL.Services.Interfaces;
+using GymManagement.BLL.ViewModels.AnalyticsViewModels;
+using GymManagement.BLL.ViewModels.MemberViewModels;
 using GymManagement.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace GymManagement.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IAnalyticsService _analyticsService;
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IAnalyticsService analyticsService, ILogger<HomeController> logger)
         {
+            _analyticsService = analyticsService;
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index(CancellationToken ct)
         {
-            return View();
+            var data = await _analyticsService.GetDataAsync(ct);
+            if(!data.success)
+                return View(Enumerable.Empty<AnalyticsViewModel>());
+
+            return View(data.value);
         }
 
         public IActionResult Privacy()
