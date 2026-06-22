@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using GymManagement.BLL.ViewModels.MembershipViewModels;
 using GymManagement.BLL.ViewModels.MemberViewModels;
 using GymManagement.BLL.ViewModels.PlanViewModels;
 using GymManagement.BLL.ViewModels.SessionViewModels;
@@ -16,16 +17,18 @@ namespace GymManagement.BLL
     {
         public MappingProfile()
         {
-            MemberMap();
+            MapMember();
 
-            TrainerMap();
+            MapTrainer();
 
-            PlaMap();
+            MapPlan();
 
-            SessionMap();
+            MapSession();
+
+            MapMembership();
         }
 
-        private void MemberMap()
+        private void MapMember()
         {
             #region Member
 
@@ -63,7 +66,7 @@ namespace GymManagement.BLL
             #endregion
         }
 
-        private void TrainerMap()
+        private void MapTrainer()
         {
             #region Trainer
 
@@ -95,7 +98,7 @@ namespace GymManagement.BLL
             #endregion
         }
 
-        private void PlaMap()
+        private void MapPlan()
         {
             #region Plan
 
@@ -109,7 +112,7 @@ namespace GymManagement.BLL
             #endregion
         }
 
-        private void SessionMap()
+        private void MapSession()
         {
             CreateMap<Session, SessionViewModel>()
                 .ForMember(dest => dest.TrainerName, opt => opt.MapFrom(src => src.Trianer.Name))
@@ -121,6 +124,22 @@ namespace GymManagement.BLL
             CreateMap<Trainer, TrainerSelectViewModel>();
 
             CreateMap<Session, SessionToUpdateViewModel>().ReverseMap();
+
+        }
+
+        private void MapMembership()
+        {
+            CreateMap<MemberShip, MembershipViewModel>()
+                .ForMember(dest => dest.MemberName, opt => opt.MapFrom(src => src.Member.Name))
+                .ForMember(dest => dest.PlanName, opt => opt.MapFrom(src => src.Plan.Name))
+                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.CreatedAt));
+
+            CreateMap<CreateMembershipViewModel, MemberShip>()
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.StartDate));
+
+            CreateMap<Member, MemberSelectViewModel>();
+
+            CreateMap<Plan, PlanSelectViewModel>();
 
         }
     }
