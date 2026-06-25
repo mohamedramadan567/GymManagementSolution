@@ -4,8 +4,11 @@ using GymManagement.BLL.Services.Classes;
 using GymManagement.BLL.Services.Interfaces;
 using GymManagement.DAL.Data.DataSeeding;
 using GymManagement.DAL.Data.DbContexts;
+using GymManagement.DAL.Data.Models;
 using GymManagement.DAL.Repositories.Classes;
 using GymManagement.DAL.Repositories.Interfaces;
+using GymManagement.PL;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
@@ -32,6 +35,27 @@ namespace GymManagement
             builder.Services.AddScoped<IMembershipRepository, MembershipRepository>();
             builder.Services.AddScoped<IMembershipService, MembershipService>();
             builder.Services.AddScoped<IAttachmentService, AttachmentService>();
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(cong =>
+            {
+                //cong.Password.RequireLowercase = true;  //default
+                //cong.Password.RequireUppercase = true;  //default
+                //cong.Password.RequiredLength = 6;   //default
+
+
+                cong.User.RequireUniqueEmail = true;
+                cong.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(2);
+                cong.Lockout.MaxFailedAccessAttempts = 5;
+            })
+                            .AddEntityFrameworkStores<GymDbContext>();
+
+            //this way to change Cookies settings 
+            //builder.Services.ConfigureApplicationCookie(options =>
+            //{
+            //    //options.LoginPath = "/Account/Login";
+            //    options.AccessDeniedPath = "/Account/AccessDenied";
+            //});
+
+
             builder.Services.AddAutoMapper(m => m.AddProfile(new MappingProfile()));
             builder.Services.AddDbContext<GymDbContext>(options =>
             {
@@ -40,18 +64,7 @@ namespace GymManagement
 
             var app = builder.Build();
 
-            var scope = app.Services.CreateScope();
-            var _context = scope.ServiceProvider.GetRequiredService<GymDbContext>();
-            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-
-            var folderPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot", "Files");
-            var penddingMigrations = await _context.Database.GetPendingMigrationsAsync();
-            if(penddingMigrations.Any())
-            {
-                await _context.Database.MigrateAsync();
-            }
-
-            await GymDataSeeding.SeedAsync(_context, folderPath, logger);
+            await app.MigrateAndSeedDatabaseAsync();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
