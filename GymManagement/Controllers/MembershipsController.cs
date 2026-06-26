@@ -3,12 +3,14 @@ using GymManagement.BLL.Services.Interfaces;
 using GymManagement.BLL.ViewModels.MembershipViewModels;
 using GymManagement.BLL.ViewModels.MemberViewModels;
 using GymManagement.BLL.ViewModels.SessionViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Threading.Tasks;
 
 namespace GymManagement.PL.Controllers
 {
+    [Authorize]
     public class MembershipsController : Controller
     {
         private readonly IMembershipService _membershipService;

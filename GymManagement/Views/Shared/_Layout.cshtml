@@ -33,12 +33,15 @@
                         <li class="nav-item">
                             <a class="nav-link px-3 py-2 mx-2 fw-bolder fs-5 @(currentController == "Home" ? "active" : "")" asp-action="Index" asp-controller="Home">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link px-3 py-2 mx-2 fw-bolder fs-5 @(currentController == "Members" ? "active" : "")" asp-action="Index" asp-controller="Members">Members</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link px-3 py-2 mx-2 fw-bolder fs-5 @(currentController == "Trainers" ? "active" : "")" asp-action="Index" asp-controller="Trainers">Trainers</a>
-                        </li>
+                        @if(User.IsInRole("SuperAdmin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link px-3 py-2 mx-2 fw-bolder fs-5 @(currentController == "Members" ? "active" : "")" asp-action="Index" asp-controller="Members">Members</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link px-3 py-2 mx-2 fw-bolder fs-5 @(currentController == "Trainers" ? "active" : "")" asp-action="Index" asp-controller="Trainers">Trainers</a>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a class="nav-link px-3 py-2 mx-2 fw-bolder fs-5 @(currentController == "Sessions" ? "active" : "")" asp-action="Index" asp-controller="Sessions">Sessions</a>
                         </li>
