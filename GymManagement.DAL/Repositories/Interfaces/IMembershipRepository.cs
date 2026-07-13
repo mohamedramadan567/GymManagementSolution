@@ -10,6 +10,6 @@ namespace GymManagement.DAL.Repositories.Interfaces
 {
     public interface IMembershipRepository : IGenericRepository<MemberShip>
     {
-        Task<IEnumerable<MemberShip>> GetAllMembershipsWithMemberAndPlanAsync(Expression<Func<MemberShip, bool>>? filter = null, CancellationToken ct = default);
+        Task<IEnumerable<MemberShip>> GetMembershipsWithMembersAndPlansAsync(Expression<Func<MemberShip, bool>>? filter = null, CancellationToken ct = default);
     }
 }

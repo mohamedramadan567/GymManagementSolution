@@ -19,12 +19,12 @@ namespace GymManagement.DAL.Repositories.Classes
         {
             _dbContext = dbContext;
         }
-        public async Task<IEnumerable<MemberShip>> GetAllMembershipsWithMemberAndPlanAsync(Expression<Func<MemberShip, bool>>? filter = null, CancellationToken ct = default)
+        public async Task<IEnumerable<MemberShip>> GetMembershipsWithMembersAndPlansAsync(Expression<Func<MemberShip, bool>>? filter = null, CancellationToken ct = default)
         {
-            var query = _dbContext.MemberShips.AsNoTracking().Include(s => s.Member).Include(s => s.Plan);
+            var query = _dbContext.MemberShips.Include(s => s.Member).Include(s => s.Plan).AsNoTracking();
             if (filter is not null)
-                query.Where(filter);
-            return await query.ToListAsync();
+                query = query.Where(filter);
+            return await query.ToListAsync(ct);
         }
     }
 }

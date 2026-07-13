@@ -22,18 +22,14 @@ namespace GymManagement.PL.Controllers
         public async Task<IActionResult> Index(CancellationToken ct)
         {
             var memberships = await _membershipService.GetAllMembershipsAsync(ct);
-            if (memberships is null)
-            {
-                return View(Enumerable.Empty<MembershipViewModel>());
-            }
             return View(memberships);
         }
 
         #region Create Membership
         [HttpGet]
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create(CancellationToken ct)
         {
-            await PopulateDropDownListAsync();
+            await PopulateDropDownListAsync(ct);
             return View();
         }
 
@@ -42,7 +38,7 @@ namespace GymManagement.PL.Controllers
         {
             if (!ModelState.IsValid)
             {
-                await PopulateDropDownListAsync();
+                await PopulateDropDownListAsync(ct);
                 return View(model);
             }
 
@@ -55,7 +51,7 @@ namespace GymManagement.PL.Controllers
             }
             TempData["ErrorMessage"] = result.error;
 
-            await PopulateDropDownListAsync();
+            await PopulateDropDownListAsync(ct);
             return View(model);
         }
 
@@ -71,10 +67,10 @@ namespace GymManagement.PL.Controllers
 
         }
 
-        private async Task PopulateDropDownListAsync()
+        private async Task PopulateDropDownListAsync(CancellationToken ct = default)
         {
-            var membersResult = await _membershipService.GetMembersForDropDownAsync();
-            var plansResult = await _membershipService.GetPlansForDropDownAsync();
+            var membersResult = await _membershipService.GetMembersForDropDownAsync(ct);
+            var plansResult = await _membershipService.GetPlansForDropDownAsync(ct);
 
             ViewBag.Members = new SelectList(membersResult, "Id", "Name");
             ViewBag.Plans = new SelectList(plansResult, "Id", "Name");
