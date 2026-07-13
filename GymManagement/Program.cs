@@ -25,16 +25,28 @@ namespace GymManagement
             builder.Services.AddControllersWithViews();
             //builder.Services.AddScoped<IPlanRepository, PlanRepository>();
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            #region Service
+
             builder.Services.AddScoped<IMemberService, MemberService>();
             builder.Services.AddScoped<IPlanService, PlanService>();
             builder.Services.AddScoped<ITrainerService, TrainerService>();
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddScoped<ISessionRepository, SessionRepository>();
             builder.Services.AddScoped<ISessionService, SessionService>();
             builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
-            builder.Services.AddScoped<IMembershipRepository, MembershipRepository>();
             builder.Services.AddScoped<IMembershipService, MembershipService>();
             builder.Services.AddScoped<IAttachmentService, AttachmentService>();
+            builder.Services.AddScoped<IBookingService, BookingService>();
+
+            #endregion
+
+            #region Repository + UoW
+
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+            builder.Services.AddScoped<IMembershipRepository, MembershipRepository>();
+            builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+
+            #endregion
+
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(cong =>
             {
                 //cong.Password.RequireLowercase = true;  //default
