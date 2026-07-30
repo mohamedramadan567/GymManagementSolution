@@ -53,7 +53,7 @@ namespace GymManagement.DAL.Repositories.Classes
         {
             IQueryable<TEntity> query = tracking ? _set : _set.AsNoTracking();
             if (filter is not null)
-                query.Where(filter);
+                query = query.Where(filter);
             return await query.ToListAsync(ct);
         }
 
