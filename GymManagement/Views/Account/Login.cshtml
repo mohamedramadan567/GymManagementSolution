@@ -244,8 +244,6 @@
             letter-spacing: 1px;
         }
 
-
-
         /* Loading Animation */
         .btn-login.loading {
             position: relative;
@@ -266,8 +264,6 @@
                 border-radius: 50%;
                 animation: spin 0.6s linear infinite;
             }
-
-
     </style>
 </head>
 <body>
@@ -300,15 +296,25 @@
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
 
-                <div class="form-floating">
+                <!-- Password Input With Toggle Eye Icon -->
+                <div class="form-floating position-relative">
                     <input asp-for="Password"
-                           class="form-control"
+                           type="password"
+                           class="form-control pe-5"
                            id="floatingPassword"
                            placeholder="Password"
                            autocomplete="current-password" />
                     <label for="floatingPassword">
                         <i class="bi bi-lock-fill me-2"></i>Password
                     </label>
+                    
+                    <button type="button" 
+                            class="btn btn-link text-secondary position-absolute end-0 top-50 translate-middle-y me-2 p-0 border-0" 
+                            id="togglePassword" 
+                            style="z-index: 10; text-decoration: none;">
+                        <i class="bi bi-eye-slash" id="toggleIcon" style="font-size: 1.2rem;"></i>
+                    </button>
+
                     <span asp-validation-for="Password" class="text-danger small"></span>
                 </div>
 
@@ -360,7 +366,6 @@
     </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.js"></script>
 
     <partial name="_ValidationScriptsPartial" />
@@ -375,6 +380,16 @@
                     btn.classList.add('loading');
                     btn.disabled = true;
                 }
+            });
+
+            $('#togglePassword').on('click', function () {
+                const passwordInput = $('#floatingPassword');
+                const toggleIcon = $('#toggleIcon');
+                
+                const isPassword = passwordInput.attr('type') === 'password';
+                passwordInput.attr('type', isPassword ? 'text' : 'password');
+                
+                toggleIcon.toggleClass('bi-eye bi-eye-slash');
             });
         });
     </script>
