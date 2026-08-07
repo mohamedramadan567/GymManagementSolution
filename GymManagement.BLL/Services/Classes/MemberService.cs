@@ -8,6 +8,7 @@ using GymManagement.DAL.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -61,9 +62,17 @@ namespace GymManagement.BLL.Services.Classes
         }
 
 
-        public async Task<Result<IEnumerable<MemberViewModel>>> GetAllMembersAsync(CancellationToken ct)
+        public async Task<Result<IEnumerable<MemberViewModel>>> GetAllMembersAsync(string? search = null, CancellationToken ct = default)
         {
-            var members = await _unitOfWork.GetRepository<Member>().GetAllAsync(ct: ct);
+            // Build filter for search (Name, Email, Phone) - case insensitive partial match
+            Expression<Func<Member, bool>>? filter = null;
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var q = search.Trim().ToLower();
+                filter = m => m.Name.ToLower().Contains(q) || m.Email.ToLower().Contains(q) || m.Phone.ToLower().Contains(q);
+            }
+
+            var members = await _unitOfWork.GetRepository<Member>().GetAllAsync(filter, ct: ct);
 
             if (!members.Any())
                 return Result<IEnumerable<MemberViewModel>>.NotFound("No members found");

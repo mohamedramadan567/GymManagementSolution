@@ -31,6 +31,10 @@
 
         <div class="container">
             <header class="d-flex justify-content-end mt-5 mb-4 align-items-center">
+                <form method="get" asp-controller="Members" asp-action="Index" class="me-3 d-flex">
+                    <input name="search" value="@(ViewBag.Search ?? "")" class="form-control form-control-sm" placeholder="Search members..." />
+                    <button type="submit" class="btn btn-outline-secondary btn-sm ms-2">Search</button>
+                </form>
                 <a asp-controller="Members" asp-action="Create" class="btn btn-fill fw-medium rounded-pill px-3 py-3"> + Add Member </a>
             </header>
 

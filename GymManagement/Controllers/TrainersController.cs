@@ -20,10 +20,11 @@ namespace GymManagement.PL.Controllers
 
 
         //GET BaseUrl/Trainers/Index
-        //Index - List all trainers
-        public async Task<IActionResult> Index(CancellationToken ct)
+        //Index - List all trainers (supports optional search)
+        public async Task<IActionResult> Index(string? search, CancellationToken ct)
         {
-            var result = await _trainerService.GetAllTrainersAsync(ct);
+            var result = await _trainerService.GetAllTrainersAsync(search, ct);
+            ViewBag.Search = search;
             return View(result.value);
         }
 

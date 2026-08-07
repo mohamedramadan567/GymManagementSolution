@@ -7,6 +7,7 @@ using GymManagement.DAL.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -38,9 +39,17 @@ namespace GymManagement.BLL.Services.Classes
             return result > 0 ? Result.OK() : Result.Fail("Failed to create trainer");
         }
 
-        public async Task<Result<IEnumerable<TrainerViewModel>>> GetAllTrainersAsync(CancellationToken ct = default)
+        public async Task<Result<IEnumerable<TrainerViewModel>>> GetAllTrainersAsync(string? search = null, CancellationToken ct = default)
         {
-            var trainers = await _unitOfWork.GetRepository<Trainer>().GetAllAsync(ct: ct);
+            // Build optional search filter (Name, Email, Phone)
+            Expression<Func<Trainer, bool>>? filter = null;
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var q = search.Trim().ToLower();
+                filter = t => t.Name.ToLower().Contains(q) || t.Email.ToLower().Contains(q) || t.Phone.ToLower().Contains(q);
+            }
+
+            var trainers = await _unitOfWork.GetRepository<Trainer>().GetAllAsync(filter, ct: ct);
 
             if (!trainers.Any())
                 return Result<IEnumerable<TrainerViewModel>>.NotFound("No trainers found");
@@ -65,51 +74,39 @@ namespace GymManagement.BLL.Services.Classes
         public async Task<Result<TrainerToUpdateViewModel>> GetTrainerToUpdateAsync(int trainerId, CancellationToken ct = default)
         {
             var trainer = await _unitOfWork.GetRepository<Trainer>().GetByIdAsync(trainerId, ct);
-            if (trainer == null) return Result<TrainerToUpdateViewModel>.NotFound("Trainer Not Found");
+
+            if (trainer is null) return Result<TrainerToUpdateViewModel>.NotFound("Trainer Not Found");
 
             var model = _mapper.Map<Trainer, TrainerToUpdateViewModel>(trainer);
             return Result<TrainerToUpdateViewModel>.OK(model);
         }
 
-        public async Task<Result> RemoveTrainerAsync(int trainerId, CancellationToken ct = default)
-        {
-            var trainer = await _unitOfWork.GetRepository<Trainer>().GetByIdAsync(trainerId, ct);
-
-            if (trainer == null)
-                return Result.NotFound("Trainer Not Found");
-
-            var hasFutureSessions = await _unitOfWork.GetRepository<Session>()
-                .AnyAsync(s => s.TrainerId == trainerId && s.StartDate > DateTime.Now);
-
-            if (hasFutureSessions)
-                return Result.Validation("Cannot remove trainer with future sessions booked");
-
-            _unitOfWork.GetRepository<Trainer>().Delete(trainer);
-            var result = await _unitOfWork.SaveChangesAsync(ct);
-
-            return result > 0 ? Result.OK() : Result.Fail("Failed to remove trainer");
-        }
-
         public async Task<Result> UpdateTrainerDetailsAsync(int id, TrainerToUpdateViewModel model, CancellationToken ct = default)
         {
             var trainer = await _unitOfWork.GetRepository<Trainer>().GetByIdAsync(id, ct);
-
-            if (trainer == null)
-                return Result.NotFound("Trainer Not Found");
+            if (trainer == null) return Result.NotFound("Trainer Not Found");
 
             var emailExist = await _unitOfWork.GetRepository<Trainer>().AnyAsync(t => t.Email == model.Email && t.Id != id, ct);
             var phoneExist = await _unitOfWork.GetRepository<Trainer>().AnyAsync(t => t.Phone == model.Phone && t.Id != id, ct);
 
-            if (emailExist || phoneExist)
-                return Result.Validation("Email or Phone number already exists for another trainer");
+            if (emailExist || phoneExist) return Result.Validation("Email or Phone number already exists");
 
             _mapper.Map(model, trainer);
             trainer.UpdatedAt = DateTime.Now;
 
             _unitOfWork.GetRepository<Trainer>().Update(trainer);
             var result = await _unitOfWork.SaveChangesAsync(ct);
+            return result > 0 ? Result.OK() : Result.Fail("Failed to update trainer");
+        }
 
-            return result > 0 ? Result.OK() : Result.Fail("Failed to update trainer details");
+        public async Task<Result> RemoveTrainerAsync(int trainerId, CancellationToken ct = default)
+        {
+            var trainer = await _unitOfWork.GetRepository<Trainer>().GetByIdAsync(trainerId, ct);
+            if (trainer == null) return Result.NotFound("Trainer Not Found");
+
+            _unitOfWork.GetRepository<Trainer>().Delete(trainer);
+            var result = await _unitOfWork.SaveChangesAsync(ct);
+            return result > 0 ? Result.OK() : Result.Fail("Failed to remove trainer");
         }
     }
 }

@@ -39,14 +39,15 @@ namespace GymManagement.PL.Controllers
         #endregion
 
         //GET BaseUrl/Members/Index
-        //Index - List all members
-        public async Task<IActionResult> Index(CancellationToken ct)
+        //Index - List all members (supports optional search)
+        public async Task<IActionResult> Index(string? search, CancellationToken ct)
         {
-            var members = await _memberService.GetAllMembersAsync(ct);
+            var members = await _memberService.GetAllMembersAsync(search, ct);
             if(!members.success)
             {
                 return View(Enumerable.Empty<MemberViewModel>());
             }
+            ViewBag.Search = search;
             return View(members.value);
         }
 
