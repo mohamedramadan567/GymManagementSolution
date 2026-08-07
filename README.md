@@ -65,6 +65,7 @@ GymManagementSolution/
 - **Auditable Base Entity** — All domain entities inherit `BaseEntity` (`Id`, `CreatedAt`, `UpdatedAt`), giving consistent identity and audit timestamps across the model (e.g., `CreatedAt` doubles as `JoinDate`/`HireDate`/`BookingDate` depending on context).
 - **Database Seeding on Startup** — `ProgramExtensions.MigrateAndSeedDatabaseAsync` automatically applies pending EF Core migrations and seeds both domain data (`GymDataSeeding`) and ASP.NET Identity roles/users (`IdentityDataSeeding`) at application boot.
 - **ASP.NET Core Identity** — Authentication/authorization is handled via `ApplicationUser : IdentityUser` with custom lockout and unique-email policies configured in `Program.cs`.
+- **Server-Side Search/Filtering** — `IMemberService` / `ITrainerService` (or their repositories) expose a search method that applies a case-insensitive partial match (`LIKE`/`Contains`) across `Name`, `Email`, and `Phone` at the query level (EF Core translates it to SQL), rather than filtering in memory. Search is submit-based — the user enters a term and clicks **Search** to trigger the query (not live/AJAX-as-you-type).
 
 ---
 
@@ -92,6 +93,23 @@ GymManagementSolution/
 - **ASP.NET Core Identity** for authentication & role-based authorization
 - **AutoMapper**
 - Razor Views + HTML/CSS/vanilla JS front end
+
+---
+
+## 🌐 Live Demo
+
+A hosted version of the app is available for anyone who wants to try it out without running it locally:
+
+🔗 **[https://gold-gym-management.runasp.net/](https://gold-gym-management.runasp.net/)**
+
+Demo accounts:
+
+| Role | Email | Password |
+|---|---|---|
+| SuperAdmin | `mohamedramadan@gmail.com` | `P@ssw0rd` |
+| Admin | `ramyramadan@gmail.com` | `P@ssw0rd` |
+
+> ⚠️ This is a demo/educational deployment — please don't use real personal data when testing, and expect the database to be reset periodically.
 
 ---
 
@@ -124,6 +142,7 @@ cd GymManagementSolution
 
 - Member registration & profile management (with photo upload)
 - Trainer management by specialty (General Fitness, Yoga, Boxing, CrossFit)
+- Server-side search & filtering for Members and Trainers by Name, Email, or Phone (case-insensitive partial match, submit-based via a Search button)
 - Subscription plan management and membership tracking (active/expired)
 - Session scheduling per trainer/category with member bookings and attendance
 - Member health record tracking
